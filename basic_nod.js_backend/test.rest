@@ -1,0 +1,20 @@
+### TEST GET / WEBSITE 
+GET http://localhost:8383/
+
+### DATA ENDOPONT 
+GET http://localhost:8383/api/data
+
+
+### DATA ENDPOIN FOR ADDING A USER 
+POST http://localhost:8383/api/data
+Content-Type: application/json
+
+{ 
+    "name": "your request"
+}  
+
+### DELETE ENDPOIN FOR ADDING A USER 
+DELETE http://localhost:8383/api/data
+
+### DELETE ENDPOINT FOR A SPECIFIC USER BY ID
+DELETE http://localhost:8383/api/data/1
