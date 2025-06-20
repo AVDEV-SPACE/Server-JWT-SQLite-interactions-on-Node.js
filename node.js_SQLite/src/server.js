@@ -1,33 +1,44 @@
-import express from 'express' 
-import path , {dirname} from  'path'
-import { fileURLToPath } from 'url'
-import authRoutes from './routes/authRoutes.js'
-import todoRoutes from './routes/todoRoutes.js'
-import db from './db.js';
+// src/server.js
+import express from 'express';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import authRoutesFactory from './routes/authRoutes.js'; // Reține "Factory"
+import todoRoutes from './routes/todoRoutes.js'; // Dacă și acesta are nevoie de db, va trebui și el modificat
+import dbPromise from './db.js'; // Importă promisiunea
 
-const app = express()
-const PORT = process.env.PORT || 5000
+const app = express();
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-app.use('/auth', authRoutes)
-app.use('/todos', todoRoutes)
+// Așteaptă inițializarea bazei de date înainte de a porni serverul și rutele
+async function startServer() {
+    try {
+        const db = await dbPromise; // Așteaptă aici rezolvarea promisiunii
+
+        // Acum pasezi instanța `db` reală către fabrica de rute
+        app.use('/auth', authRoutesFactory(db));
+
+        // app.use('/todos', todoRoutes(db));
 
 
-//! --  Get the file path from the URL of the current module
-const __filename = fileURLToPath(import.meta.url)
-//! --  Get the directory name from the file path
-const __dirname = dirname(__filename)
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
 
-//! -- Tell Express to send all the files from `/public` route
-app.use(express.static(path.join(__dirname, '../public'))) 
+        app.use(express.static(path.join(__dirname, '../public')));
 
-//* -- sending HTML file from the `/public` directory
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
-})
+        app.get('/', (req, res) => {
+            res.sendFile(path.join(__dirname, 'public', 'index.html'));
+        });
 
-app.listen(PORT, () => {
-    console.log(`Server has started on port: ${PORT}`)
-})
+        app.listen(PORT, () => {
+            console.log(`Server has started on port: ${PORT}`);
+        });
 
+    } catch (err) {
+        console.error("Failed to initialize database or start server:", err);
+        process.exit(1); // Ieși din proces dacă nu se poate inițializa baza de date
+    }
+}
+
+startServer(); // Apelez funcția asincronă pentru a porni serverul

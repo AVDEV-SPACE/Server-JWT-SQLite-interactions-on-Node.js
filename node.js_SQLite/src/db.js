@@ -1,15 +1,17 @@
 import { open } from 'sqlite';
 import sqlite3 from 'sqlite3';
 
-// Inițializarea bazei de date
+// Variabila `db` este globală în acest modul, dar este reutilizată intern în initializeDatabase
+// Aceasta este o funcție asincronă care returnează o promisiune
 async function initializeDatabase() {
-    const db = await open({
-        filename: ':memory:',
+    const dbInstance = await open({ // Redenumit pentru claritate
+        filename: './database.sqlite',
         driver: sqlite3.Database
     });
 
     // Crearea tabelelor
-    await db.exec(`
+    // NOTĂ: Ai folosit 'user' aici, ceea ce este corect, dar verifică și în authRoutes.js să folosești tot 'user'
+    await dbInstance.exec(`
         CREATE TABLE IF NOT EXISTS user (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
@@ -17,7 +19,7 @@ async function initializeDatabase() {
         )
     `);
 
-    await db.exec(`
+    await dbInstance.exec(`
         CREATE TABLE IF NOT EXISTS todos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -27,7 +29,9 @@ async function initializeDatabase() {
         )
     `);
 
-    return db;
+    return dbInstance; // Această funcție returnează instanța bazei de date deschise
 }
 
+// Aici exportăm direct rezultatul apelului funcției initializeDatabase(), care este o Promisiune.
+// Acest lucru înseamnă că `db` în alte fișiere va fi o Promisiune, nu direct instanța bazei de date.
 export default initializeDatabase();
