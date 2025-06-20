@@ -1,5 +1,5 @@
 {
-	"name": "chapter_1",
+	"name": "basic_nod.js_backend",
 	"version": "1.0.0",
 	"description": "A simple backend server.",
 	"main": "index.js",
